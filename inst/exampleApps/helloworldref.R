@@ -4,7 +4,7 @@ app <- setRefClass(
 	call = function(env){
 	    list(
 		status=200,
-		headers <- list(
+		headers = list(
 		    'Content-Type' = 'text/html'
 		    ),
 		body = paste('<h1>Hello World!</h1>')
