@@ -1,7 +1,7 @@
-0b3cd2d7c0027fbc12424d0190762a3e *DESCRIPTION
+0c6243f858f8b36be3a5aea18d333edb *DESCRIPTION
 5ec156fbac815febcb8ba29d7c2ad094 *NAMESPACE
 02f4925e8efe6b71995eb70fc92ef838 *R/App.R
-2d028085559702028548e137ce5ce595 *R/Brewery.R
+5db24d13aceaa840d7633130ba1962f2 *R/Brewery.R
 349afa5b85e1d4858aa031f04d724c75 *R/Builder.R
 30bfe216b099f52e18958cbe3527adf8 *R/File.R
 9a65be637551eee4d6b6cd1e30d7dd51 *R/Redirect.R
@@ -11,7 +11,7 @@ d482cb3c5279469cad8be8c6a7427575 *R/Request.R
 e6952d21f4eb6d2825192f527fa91d44 *R/Static.R
 4c6f94bf4d06905a12222e092509cd9e *R/URLMap.R
 f96de9e408627b7bae010551bfe82c05 *R/onLoad.R
-159a86ee03f1560e807bbe69f2ed841d *R/utils.R
+1325450f2d40169d1aeb1c0a2e9c31be *R/utils.R
 adf370611ed7a3759aab58762ee21b70 *inst/exampleApps/Hmisc/brew/useR2007.rhtml
 2d7419abc0eb05710ac955d5937e62b9 *inst/exampleApps/Hmisc/brew/useR2007plot.rhtml
 564c64d585bd6f6fe94e89c7c6da1cdf *inst/exampleApps/Hmisc/brew/useR2007sim.rhtml
