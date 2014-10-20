@@ -6,7 +6,6 @@
          readLines(n=n,warn=FALSE)
       },
       read = function(l = -1L){
-         if (l <= 0 ) return(raw())
          receiveBin(l)
       },
       rewind = function(){
@@ -72,16 +71,13 @@ Server <- setRefClass(
          hostport <- strsplit(get('HTTP_HOST',env),':',fixed=TRUE)[[1]]
 
          assign('SERVER_NAME',hostport[1],env)
-         assign('SERVER_PORT',hostport[2],env)
+         if ('port' %in% names(SERVER))
+            assign('SERVER_PORT',SERVER$port,env)
+         else
+            assign('SERVER_PORT',hostport[2],env)
 
          assign('rook.version',packageDescription('Rook',fields='Version'),env)
-         if (exists('HTTP_ORIGIN',env)){
-            assign(
-               'rook.url_scheme',
-               strsplit(get('HTTP_ORIGIN',env),':',fixed=TRUE)[[1]][1]
-               ,env
-            )
-         }
+         assign('rook.url_scheme', ifelse(isTRUE(SERVER$HTTPS),'https','http'),env)
          assign('rook.input',.rApacheInputStream$new(),env)
          assign('rook.errors',.rApacheErrorStream$new(),env)
 
@@ -97,6 +93,8 @@ Server <- setRefClass(
             return(HTTP_INTERNAL_SERVER_ERROR)
          }
 
+         setStatus(res$status)
+
          setContentType(res$headers$`Content-Type`)
          res$headers$`Content-Type` <- NULL
          lapply(names(res$headers),function(n)setHeader(n,res$headers[[n]]))
@@ -110,7 +108,41 @@ Server <- setRefClass(
             sendBin(res$body)
          }
 
-         ifelse(res$status==200,OK,res$status)
+         OK
       }
    )
 )$new()
+
+Request$methods(
+   GET = function(){
+      if (!exists('rook.request.query_list',env))
+         env[['rook.request.query_list']] <<- base::get('GET','rapache')
+      env[['rook.request.query_list']]
+   },
+   POST = function() {
+      if (exists('rook.request.form_list',env))
+         return(env[['rook.request.form_list']])
+      postvar <- base::get('POST','rapache')
+      filevar <- base::get('FILES','rapache')
+
+      if (length(postvar) <= 0 && length(filevar) <= 0) return(NULL)
+
+      if (length(filevar) > 0){
+         if (length(postvar) <= 0) postvar <- list()
+         for (n in names(filevar)){
+            if (length(filevar[[n]])>0){
+               postvar[[n]] <- list(
+                  filename = filevar[[n]]$name,
+                  tempfile = filevar[[n]]$tmp_name,
+                  content_type = Mime$mime_type(Mime$file_extname(filevar[[n]]$name))
+               )
+            }
+         }
+      }
+      for (n in names(postvar)){
+         if (is.null(postvar[[n]])) postvar[[n]] <- NULL
+      }
+      env[['rook.request.form_list']] <<- postvar
+      postvar
+   }
+)

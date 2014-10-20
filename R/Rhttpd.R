@@ -283,11 +283,8 @@ Rhttpd <- setRefClass(
       # The R internal web server unescapes the query, so in order
       # abid the Rook spec, we have to do things in reverse:
       #
-      # 1. escape the query object so that subsequent URI building
-      #    methods will add the correct query string.
-
-      # 2. Go ahead and assign the Rook::Request specific query list
-      #    object since there's no need to re-parse.
+      # escape the query object so that subsequent URI building
+      # methods will add the correct query string.
       assign('QUERY_STRING',
          ifelse(is.null(query),
             '',
@@ -295,8 +292,12 @@ Rhttpd <- setRefClass(
             ),
          env
          )
-      assign('rook.request.query_list',as.list(query),env)
-      assign('REQUEST_METHOD',ifelse(is.null(postBody),'GET','POST'),env)
+      
+      if(exists("HTTP_REQUEST_METHOD", env)){
+        assign('REQUEST_METHOD',get("HTTP_REQUEST_METHOD", env) ,env)
+      } else {      
+        assign('REQUEST_METHOD',ifelse(is.null(postBody),'GET','POST'),env)
+      }
 
       hostport <- strsplit(get('HTTP_HOST',env),':',fixed=TRUE)[[1]]
 
@@ -356,20 +357,27 @@ Rhttpd <- setRefClass(
          }
          contentType <- res$headers$`Content-Type`;
          res$headers$`Content-Type` <- NULL;
+
+         # The internal web server expects a list like the below,
+         # and the position of each element is important.
          ret <- list(
             payload = res$body,
             `content-type` = contentType,
-            headers = paste(names(res$headers),': ',res$headers,sep=''),
+            headers = NULL,
             `status code` = res$status
-            )
+         )
 
          # Change the name of payload to file in the case that
          # payload *is* a filename
          if (!is.null(names(res$body)) && names(res$body)[1] == 'file'){
             names(ret) <- c('file',names(ret)[-1])
-            # Delete content length as Rhttpd will add it
-            res$headers$`Content-Length` <- NULL;
-            ret$headers = paste(names(res$headers),': ',res$headers,sep='')
+         }
+
+         # Rhttpd doesn't allow Content-Length in the headers, so delete
+         # it as well
+         res$headers$`Content-Length` <- NULL;
+         if (length(res$headers)>0){
+            ret$headers <- paste(names(res$headers),': ',res$headers,sep='')
          }
 
          if (debug()>0){
