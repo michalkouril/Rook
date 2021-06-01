@@ -368,6 +368,13 @@ Multipart <- setRefClass(
 				if (!is.null(content_type))
 				    data$content_type <- content_type
 				data$head <- head
+				 
+				len <- length(value)
+				# Trim trailing EOL
+				if (len > 2 && length(Utils$raw.match(EOL,value[(len-1):len],all=FALSE)))
+				  len <- len -2
+				value <- value[1:len]    
+				    
 				con <- file(data$tempfile,open='wb')
 				writeBin(value,con)
 				close(con)
