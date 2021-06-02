@@ -282,7 +282,7 @@ Multipart <- setRefClass(
 	    # Slices off the beginning part of read_buffer.
 	    slice_buffer <- function(i,size,x){
 		slice <- if(i > 1) x$read_buffer[1:(i-1)] else x$read_buffer[1] 
-		x$read_buffer <- if(size < x$read_buffer_len) x$read_buffer[(i+size):x$read_buffer_len] else raw()
+		x$read_buffer <- if((i+size) <= x$read_buffer_len) x$read_buffer[(i+size):x$read_buffer_len] else raw()
 		x$read_buffer_len <- length(x$read_buffer)
 		slice
 	    }
